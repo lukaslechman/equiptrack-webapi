@@ -26,13 +26,13 @@ switch ($command) {
         try {
             mongo up --detach
             go run ${ProjectRoot}/cmd/equiptrack-api-service
-        }finally {
+        } finally {
             mongo down
+        }
     }
     "mongo" {
         mongo up
     }
-
     default {
         throw "Unknown command: $command"
     }
