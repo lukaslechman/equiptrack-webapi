@@ -1,0 +1,8 @@
+generatorName: go-gin-server
+outputDir: /local
+inputSpec: /local/api/equipment-registry.openapi.yaml
+enablePostProcessFile: true
+additionalProperties:
+  apiPath: internal/equiptrack
+  packageName: equiptrack
+  interfaceOnly: true

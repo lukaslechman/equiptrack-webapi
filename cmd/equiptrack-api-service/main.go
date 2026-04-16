@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lukaslechman/equiptrack-webapi/api"
+	"github.com/lukaslechman/equiptrack-webapi/internal/equiptrack"
 )
 
 func main() {
@@ -22,6 +23,12 @@ func main() {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 	// request routings
+	handleFunctions := &equiptrack.ApiHandleFunctions{
+		EquipmentRegistryAPI: equiptrack.NewEquipmentRegistryApi(),
+	}
+	equiptrack.NewRouterWithGinEngine(engine, *handleFunctions)
+
 	engine.GET("/openapi", api.HandleOpenApi)
 	engine.Run(":" + port)
+
 }

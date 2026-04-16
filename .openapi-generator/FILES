@@ -1,0 +1,7 @@
+internal/equiptrack/README.md
+internal/equiptrack/api_equipment_registry.go
+internal/equiptrack/model_equipment.go
+internal/equiptrack/model_equipment_status.go
+internal/equiptrack/model_equipment_status_update.go
+internal/equiptrack/model_location.go
+internal/equiptrack/routers.go
