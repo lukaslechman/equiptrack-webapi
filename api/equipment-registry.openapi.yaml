@@ -1,0 +1,337 @@
+openapi: 3.0.0
+servers:
+  - description: Cluster Endpoint
+    url: /api
+info:
+  description: Equipment Registry management for hospital system
+  version: "1.0.0"
+  title: Equipment Registry Api
+  contact:
+    email: your_email@stuba.sk
+  license:
+    name: CC BY 4.0
+    url: "https://creativecommons.org/licenses/by/4.0/"
+tags:
+  - name: equipmentRegistry
+    description: Equipment Registry API
+
+paths:
+  "/equipment":
+    get:
+      tags:
+        - equipmentRegistry
+      summary: Returns list of all equipment
+      operationId: listEquipment
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [active, damaged, decommissioned]
+        - in: query
+          name: department
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+      responses:
+        "200":
+          description: list of equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Equipment"
+              examples:
+                response:
+                  $ref: "#/components/examples/EquipmentListExample"
+
+    post:
+      tags:
+        - equipmentRegistry
+      summary: Creates new equipment entry
+      operationId: createEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Equipment"
+            examples:
+              request:
+                $ref: "#/components/examples/EquipmentExample"
+      responses:
+        "201":
+          description: equipment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Equipment"
+        "400":
+          description: Missing mandatory properties
+        "409":
+          description: Equipment with given serial number already exists
+
+  "/equipment/{equipmentId}":
+    get:
+      tags:
+        - equipmentRegistry
+      summary: Returns details of equipment
+      operationId: getEquipment
+      parameters:
+        - in: path
+          name: equipmentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: equipment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Equipment"
+              examples:
+                response:
+                  $ref: "#/components/examples/EquipmentExample"
+        "404":
+          description: Equipment with such ID does not exist
+
+    put:
+      tags:
+        - equipmentRegistry
+      summary: Updates equipment entry
+      operationId: updateEquipment
+      parameters:
+        - in: path
+          name: equipmentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Equipment"
+            examples:
+              request:
+                $ref: "#/components/examples/EquipmentExample"
+      responses:
+        "200":
+          description: equipment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Equipment"
+        "404":
+          description: Equipment with such ID does not exist
+
+    patch:
+      tags:
+        - equipmentRegistry
+      summary: Updates equipment status (e.g. decommission)
+      operationId: updateEquipmentStatus
+      parameters:
+        - in: path
+          name: equipmentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EquipmentStatusUpdate"
+            example:
+              status: decommissioned
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Equipment"
+              examples:
+                response:
+                  $ref: "#/components/examples/EquipmentExample"
+        "404":
+          description: Equipment with such ID does not exist
+
+    delete:
+      tags:
+        - equipmentRegistry
+      summary: Permanently deletes equipment record
+      operationId: deleteEquipment
+      parameters:
+        - in: path
+          name: equipmentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Equipment permanently deleted
+        "404":
+          description: Equipment with such ID does not exist
+
+components:
+  schemas:
+    Equipment:
+      type: object
+      required: [id, name, category, manufacturer, serialNumber, purchaseDate, status, location]
+      properties:
+        id:
+          type: string
+          example: eq-001
+        name:
+          type: string
+          example: Röntgen EVO-3000
+        category:
+          type: string
+          enum: [imaging, monitoring, infusion, surgical, emergency]
+          example: imaging
+        manufacturer:
+          type: string
+          example: Siemens
+        serialNumber:
+          type: string
+          example: RX-2021-00123
+        purchaseDate:
+          type: string
+          format: date
+          example: "2021-03-15"
+        warrantyUntil:
+          type: string
+          format: date
+          example: "2024-03-15"
+        lifespanYears:
+          type: integer
+          example: 10
+        purchasePrice:
+          type: number
+          example: 85000
+        status:
+          $ref: "#/components/schemas/EquipmentStatus"
+        note:
+          type: string
+          example: ""
+        location:
+          $ref: "#/components/schemas/Location"
+
+    EquipmentStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/EquipmentStatus"
+      example:
+        status: decommissioned
+
+    EquipmentStatus:
+      type: string
+      enum: [active, damaged, decommissioned]
+      example: active
+
+        
+    Location:
+      type: object
+      required: [building, department, room]
+      properties:
+        building:
+          type: string
+          example: Budova A
+        department:
+          type: string
+          example: Rádiológia
+        room:
+          type: string
+          example: M-12
+
+  examples:
+    EquipmentExample:
+      summary: Sample equipment entry
+      value:
+        id: eq-001
+        name: Röntgen EVO-3000
+        category: imaging
+        manufacturer: Siemens
+        serialNumber: RX-2021-00123
+        purchaseDate: "2021-03-15"
+        warrantyUntil: "2024-03-15"
+        lifespanYears: 10
+        purchasePrice: 85000
+        status: active
+        note: ""
+        location:
+          building: Budova A
+          department: Rádiológia
+          room: M-12
+
+    EquipmentListExample:
+      summary: Sample list of equipment
+      value:
+        - id: eq-001
+          name: Röntgen EVO-3000
+          category: imaging
+          manufacturer: Siemens
+          serialNumber: RX-2021-00123
+          purchaseDate: "2021-03-15"
+          warrantyUntil: "2024-03-15"
+          lifespanYears: 10
+          purchasePrice: 85000
+          status: active
+          note: ""
+          location:
+            building: Budova A
+            department: Rádiológia
+            room: M-12
+        - id: eq-002
+          name: EKG Monitor CardioLife
+          category: monitoring
+          manufacturer: Philips
+          serialNumber: CL-2019-00456
+          purchaseDate: "2019-07-20"
+          warrantyUntil: "2022-07-20"
+          lifespanYears: 8
+          purchasePrice: 12000
+          status: damaged
+          note: Poškodený displej
+          location:
+            building: Budova B
+            department: Kardiológia
+            room: M-03
+        - id: eq-003
+          name: Infúzna pumpa InfuMed
+          category: infusion
+          manufacturer: B.Braun
+          serialNumber: IM-2020-00789
+          purchaseDate: "2020-05-10"
+          warrantyUntil: "2023-05-10"
+          lifespanYears: 7
+          purchasePrice: 4500
+          status: active
+          note: ""
+          location:
+            building: Budova A
+            department: Chirurgia
+            room: M-07
+        - id: eq-004
+          name: Defibrilátor ShockPro
+          category: emergency
+          manufacturer: Zoll
+          serialNumber: SP-2018-00321
+          purchaseDate: "2018-11-01"
+          warrantyUntil: "2021-11-01"
+          lifespanYears: 6
+          purchasePrice: 9800
+          status: decommissioned
+          note: Vyradený po kalibrácii
+          location:
+            building: Budova C
+            department: OAIM
+            room: M-01
