@@ -1,0 +1,5 @@
+internal/equiptrack/api_*
+internal/equiptrack/model_*
+internal/equiptrack/routers.go
+build/
+deployments/
