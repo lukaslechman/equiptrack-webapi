@@ -88,6 +88,14 @@ func (o *implEquipmentRegistryAPI) CreateEquipment(c *gin.Context) {
 		return
 	}
 
+	if msg, ok := validateEquipment(equipment); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "Bad Request",
+			"message": msg,
+		})
+		return
+	}
+
 	if equipment.Id == "" {
 		equipment.Id = uuid.New().String()
 	}
@@ -125,6 +133,13 @@ func (o *implEquipmentRegistryAPI) UpdateEquipment(c *gin.Context) {
 		if err := c.ShouldBindJSON(&updatedData); err != nil {
 			return nil, gin.H{
 				"status": http.StatusBadRequest, "message": "Invalid request body", "error": err.Error(),
+			}, http.StatusBadRequest
+		}
+
+		if msg, ok := validateEquipment(updatedData); !ok {
+			return nil, gin.H{
+				"status":  "Bad Request",
+				"message": msg,
 			}, http.StatusBadRequest
 		}
 
