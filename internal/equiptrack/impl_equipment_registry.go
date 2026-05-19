@@ -96,7 +96,7 @@ func (o *implEquipmentRegistryAPI) CreateEquipment(c *gin.Context) {
 		return
 	}
 
-	if equipment.Id == "" {
+	if equipment.Id == "" || equipment.Id == "@new" {
 		equipment.Id = uuid.New().String()
 	}
 
